@@ -3404,7 +3404,7 @@ bool MenuCommon::RenderMenu()
                         ShowHelpMarker("A sharpening filter\n"
                                        "By default uses a sharpening value provided by the game\n"
                                        "Select 'Override' under 'Sharpness' and adjust the slider to change it\n\n"
-                                       "Some upscalers have it's own sharpness filter so RCAS is not always needed");
+                                       "Some upscalers have their own sharpness filter so RCAS is not always needed");
 
                         ImGui::BeginDisabled(!Config::Instance()->RcasEnabled.value_or(rcasEnabled));
 
