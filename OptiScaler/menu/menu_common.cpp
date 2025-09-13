@@ -62,7 +62,7 @@ static std::vector<std::string> splashText = { "May the coping commence...",
                                                "The illusion of performance, perfected.",
                                                "This upscaler belongs in a museum!",
                                                "Because native rendering is overrated.",
-                                               "The more you upscaler, the more you save",
+                                               "The more you upscaler, the more you save", // perhaps should be "upscale" instead?
                                                "It's never too late to buy a better GPU",
                                                "We don't need real pixels where we're going",
                                                "Did you know that Intel released XeFG for everyone?",
@@ -72,6 +72,7 @@ static std::vector<std::string> splashText = { "May the coping commence...",
                                                "Even supports \"software\" XeSS!",
                                                "Take RCAS, you might need it",
                                                "Thanks nitec, back to you nitec",
+                                               "Upscaler? I hardly knew her!"
                                                "Tested and approved by By-U",
                                                "0.8 was an inside job",
                                                "<Your funny text goes here>",
@@ -1908,7 +1909,7 @@ bool MenuCommon::RenderMenu()
 
                     std::string joinedUpscalers(joined.begin(), joined.end());
 
-                    ImGui::Text("Please select %s as upscaler\nfrom game options and enter the game\nto enable "
+                    ImGui::Text("Please select %s as the upscaler\nfrom game options and enter the game\nto enable "
                                 "upscaler settings.\n",
                                 joinedUpscalers.c_str());
 
@@ -2145,7 +2146,7 @@ bool MenuCommon::RenderMenu()
 
                                 ImGui::EndCombo();
                             }
-                            ShowHelpMarker("Likely don't do much");
+                            ShowHelpMarker("Likely doesn't do much");
 
                             if (bool dbg = State::Instance().xessDebug; ImGui::Checkbox("Dump (Shift+Del)", &dbg))
                                 State::Instance().xessDebug = dbg;
@@ -2343,8 +2344,8 @@ bool MenuCommon::RenderMenu()
                                     if (ImGui::SliderFloat("Reactive Scale", &reactiveScale, 0.0f, 100.0f, "%.1f"))
                                         Config::Instance()->FsrReactiveScale = reactiveScale;
 
-                                    ShowHelpMarker("Meant for development purpose to test if\n"
-                                                   "writing a larger value to reactive mask, reduces ghosting.");
+                                    ShowHelpMarker("Meant for development purposes to test if\n"
+                                                   "writing a larger value to the reactive mask reduces ghosting.");
 
                                     // Shading Scale
                                     float shadingScale = Config::Instance()->FsrShadingScale.value_or_default();
@@ -2361,8 +2362,8 @@ bool MenuCommon::RenderMenu()
                                         Config::Instance()->FsrAccAddPerFrame = accAddPerFrame;
 
                                     ShowHelpMarker(
-                                        "Corresponds to amount of accumulation added per frame\n"
-                                        "at pixel coordinate where disocclusion occured or when\n"
+                                        "Corresponds to the amount of accumulation added per frame\n"
+                                        "at pixel coordinates where disocclusion occurred or when\n"
                                         "reactive mask value is > 0.0f. Decreasing this and \n"
                                         "drawing the ghosting object (IE no mv) to reactive mask \n"
                                         "with value close to 1.0f can decrease temporal ghosting.\n"
@@ -2407,7 +2408,7 @@ bool MenuCommon::RenderMenu()
                             ImGui::TextColored(ImVec4(1.f, 0.f, 0.f, 1.f), "Presets are overridden externally");
                             ShowHelpMarker("This usually happens due to using tools\n"
                                            "such as Nvidia App or Nvidia Inspector");
-                            ImGui::Text("Selecting setting below will disable that external override\n"
+                            ImGui::Text("Selecting a setting below will disable that external override\n"
                                         "but you need to Save INI and restart the game");
 
                             ImGui::Spacing();
@@ -2416,7 +2417,7 @@ bool MenuCommon::RenderMenu()
                         if (bool pOverride = Config::Instance()->RenderPresetOverride.value_or_default();
                             ImGui::Checkbox("Render Presets Override", &pOverride))
                             Config::Instance()->RenderPresetOverride = pOverride;
-                        ShowHelpMarker("Each render preset has it strengths and weaknesses\n"
+                        ShowHelpMarker("Each render preset has its strengths and weaknesses\n"
                                        "Override to potentially improve image quality");
 
                         ImGui::BeginDisabled(!Config::Instance()->RenderPresetOverride.value_or_default() ||
@@ -2621,7 +2622,7 @@ bool MenuCommon::RenderMenu()
                             LOG_DEBUG("Enabled set FGHUDFixExtended: {}", hudExtended);
                             Config::Instance()->FGHUDFixExtended = hudExtended;
                         }
-                        ShowHelpMarker("Extended format checks for possible hudless\nMight cause crash and slowdowns!");
+                        ShowHelpMarker("Extended format checks for possible hudless textures\nMight cause crashes and or slowdowns!");
                         ImGui::SameLine(0.0f, 16.0f);
 
                         ImGui::BeginDisabled(!Config::Instance()->FGHUDFix.value_or_default());
@@ -2789,8 +2790,8 @@ bool MenuCommon::RenderMenu()
                                     Config::Instance()->FGAlwaysTrackHeaps = ath;
                                     LOG_DEBUG("Enabled set FGAlwaysTrackHeaps: {}", ath);
                                 }
-                                ShowHelpMarker("Always track resources, might cause performace issues\nbut also might "
-                                               "fix HudFix related crashes!");
+                                ShowHelpMarker("Always track resources, might cause performance issues\nbut also might "
+                                               "fix HUDFix related crashes!");
 
                                 ImGui::TreePop();
                             }
@@ -2814,7 +2815,7 @@ bool MenuCommon::RenderMenu()
                                 float depthScaleMax = Config::Instance()->FGDepthScaleMax.value_or_default();
                                 if (ImGui::InputFloat("FG Scale Depth Max", &depthScaleMax, 10.0f, 100.0f, "%.1f"))
                                     Config::Instance()->FGDepthScaleMax = depthScaleMax;
-                                ShowHelpMarker("Depth values will be divided to this value");
+                                ShowHelpMarker("Depth values will be divided by this value");
                                 ImGui::PopItemWidth();
 
                                 ImGui::TreePop();
@@ -2826,8 +2827,8 @@ bool MenuCommon::RenderMenu()
                                 bool useMutexForPresent = Config::Instance()->FGUseMutexForSwapchain.value_or_default();
                                 if (ImGui::Checkbox("FG Use Mutex for Present", &useMutexForPresent))
                                     Config::Instance()->FGUseMutexForSwapchain = useMutexForPresent;
-                                ShowHelpMarker("Use mutex to prevent desync of FG and crashes\n"
-                                               "Disabling might improve the perf but decrase stability");
+                                ShowHelpMarker("Use mutex to prevent desync of FG and crashes.\n"
+                                               "Disabling may improve performance but decrease stability");
 
                                 ImGui::TreePop();
                             }
@@ -2898,7 +2899,7 @@ bool MenuCommon::RenderMenu()
                                     auto fptSafetyMargin = Config::Instance()->FGFPTSafetyMarginInMs.value_or_default();
                                     if (ImGui::InputFloat("Safety Margins in ms", &fptSafetyMargin, 0.01, 0.1, "%.2f"))
                                         Config::Instance()->FGFPTSafetyMarginInMs = fptSafetyMargin;
-                                    ShowHelpMarker("Safety margins in millisecons\n"
+                                    ShowHelpMarker("Safety margins in milliseconds\n"
                                                    "FSR default value: 0.1ms\n"
                                                    "Opti default value: 0.01ms");
 
@@ -3153,8 +3154,8 @@ bool MenuCommon::RenderMenu()
                             bool dfgEnabled = Config::Instance()->DE_DynamicLimitEnabled.value_or(false);
                             if (ImGui::Checkbox("Dynamic Frame Gen.", &dfgEnabled))
                                 Config::Instance()->DE_DynamicLimitEnabled = dfgEnabled;
-                            ShowHelpMarker("Enables FG only when FPS would go below FPS Limit.\n"
-                                           "This will result in higher input latency in situation of low fps\n"
+                            ShowHelpMarker("Enables FG only when FPS would go below the FPS Limit.\n"
+                                           "This will result in higher input latency in situations with low FPS\n"
                                            "but motion smoothness will be preserved.");
                         }
 
@@ -3331,14 +3332,14 @@ bool MenuCommon::RenderMenu()
                         ImGui::Checkbox("Force LatencyFlex", &forceLFX))
                         Config::Instance()->FN_ForceLatencyFlex = forceLFX;
                     ShowHelpMarker(
-                        "AntiLag 2 / XeLL is used when available, this setting let's you force LatencyFlex instead");
+                        "AntiLag 2 / XeLL is used when available, this setting lets you force LatencyFlex instead");
 
                     const char* lfx_modes[] = { "Conservative", "Aggressive", "Reflex ID" };
                     const std::string lfx_modesDesc[] = {
                         "The safest but might not reduce latency well",
                         "Improves latency but in some cases will lower fps more than expected",
-                        "Best when can be used, some games are not compatible (i.e. cyberpunk) and will fallback to "
-                        "aggressive"
+                        "Best when it can be used; some games are not compatible (e.g., Cyberpunk)"
+                        "and will fall back to aggressive"
                     };
 
                     PopulateCombo("LatencyFlex mode", &Config::Instance()->FN_LatencyFlexMode, lfx_modes, lfx_modesDesc,
@@ -3424,7 +3425,7 @@ bool MenuCommon::RenderMenu()
                         if (ImGui::SliderFloat("Contrast", &contrast, 0.0f, 2.0f, "%.2f"))
                             Config::Instance()->Contrast = contrast;
 
-                        ShowHelpMarker("Higher values increases sharpness at high contrast areas.\n"
+                        ShowHelpMarker("Higher values increase sharpness at high contrast areas.\n"
                                        "High values might cause graphical GLITCHES \n"
                                        "when used with high sharpness values !!!");
 
@@ -3690,7 +3691,7 @@ bool MenuCommon::RenderMenu()
                                            "Keep in mind that a reactive mask sent to DLSS\n"
                                            "will not produce a good image in combination with FSR/XeSS");
                         else
-                            ShowHelpMarker("Option disabled because tha game doesn't provide a reactive mask");
+                            ShowHelpMarker("Option disabled because the game doesn't provide a reactive mask");
 
                         ImGui::EndTable();
 
@@ -3769,7 +3770,7 @@ bool MenuCommon::RenderMenu()
                                     if (ImGui::SliderFloat("React. Mask Bias", &maskBias, 0.0f, 0.9f, "%.2f"))
                                         Config::Instance()->DlssReactiveMaskBias = maskBias;
 
-                                    ShowHelpMarker("Values above 0 activates usage of reactive mask");
+                                    ShowHelpMarker("Values above 0 activate usage of reactive mask");
                                 }
                                 else
                                 {
@@ -3802,7 +3803,7 @@ bool MenuCommon::RenderMenu()
                         if (ImGui::Checkbox("Enable Extended Limits", &extendedLimits))
                             Config::Instance()->ExtendedLimits = extendedLimits;
 
-                        ShowHelpMarker("Extended sliders limit for quality presets\n\n"
+                        ShowHelpMarker("Extended slider limits for quality presets\n\n"
                                        "Using this option changes resolution detection logic\n"
                                        "and might cause issues and crashes!");
                     }
@@ -4095,7 +4096,7 @@ bool MenuCommon::RenderMenu()
                             if (ImGui::Checkbox("MB Override All Textures", &mbAll))
                                 Config::Instance()->MipmapBiasOverrideAll = mbAll;
 
-                            ShowHelpMarker("Override all textures mipmap values\n"
+                            ShowHelpMarker("Override all texture mipmap values\n"
                                            "Normally OptiScaler only overrides\n"
                                            "below zero mipmap values!");
                         }
