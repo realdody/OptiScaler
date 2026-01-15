@@ -181,11 +181,6 @@ static HRESULT LocalPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
         }
     }
 
-    if (willPresent && cq != nullptr && fg != nullptr && fg->IsActive() && !fg->IsPaused())
-    {
-        FGTimeDx12::ReadFGTime(cq);
-    }
-
     // Fallback when FGPresent is not hooked for V-sync
     if (willPresent && Config::Instance()->ForceVsync.has_value())
     {
