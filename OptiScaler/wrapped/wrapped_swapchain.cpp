@@ -12,6 +12,7 @@
 #include <misc/FrameLimit.h>
 #include <upscaler_time/UpscalerTime_Dx11.h>
 #include <upscaler_time/UpscalerTime_Dx12.h>
+#include <fg_time/FGTime_Dx12.h>
 
 #include <d3d11.h>
 #include <d3d12.h>
@@ -178,6 +179,11 @@ static HRESULT LocalPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
             UpscalerTimeDx11::ReadUpscalingTime(context);
             context->Release();
         }
+    }
+
+    if (willPresent && cq != nullptr && fg != nullptr && fg->IsActive() && !fg->IsPaused())
+    {
+        FGTimeDx12::ReadFGTime(cq);
     }
 
     // Fallback when FGPresent is not hooked for V-sync

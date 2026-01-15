@@ -13,6 +13,7 @@
 
 #include <misc/FrameLimit.h>
 #include <upscaler_time/UpscalerTime_Dx12.h>
+#include <fg_time/FGTime_Dx12.h>
 
 #include <detours/detours.h>
 
@@ -871,6 +872,7 @@ HRESULT FGHooks::FGPresent(void* This, UINT SyncInterval, UINT Flags, const DXGI
     if (willPresent && State::Instance().currentCommandQueue != nullptr)
     {
         UpscalerTimeDx12::ReadUpscalingTime(State::Instance().currentCommandQueue);
+        FGTimeDx12::ReadFGTime(State::Instance().currentCommandQueue);
     }
 
     auto fg = State::Instance().currentFG;

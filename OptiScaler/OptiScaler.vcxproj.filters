@@ -590,6 +590,9 @@
     <ClInclude Include="upscaler_time\UpscalerTime_Dx11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="fg_time\FGTime_Dx12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="hooks\D3D12_Hooks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -966,6 +969,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="upscaler_time\UpscalerTime_Dx11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fg_time\FGTime_Dx12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hooks\D3D12_Hooks.cpp">

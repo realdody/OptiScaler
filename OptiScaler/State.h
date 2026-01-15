@@ -211,6 +211,7 @@ class State
 
     // Framegraph
     std::deque<double> upscaleTimes;
+    std::deque<double> fgTimes;
     std::deque<double> frameTimes;
     double lastFGFrameTime = 0.0;
     double presentFrameTime = 0.0;

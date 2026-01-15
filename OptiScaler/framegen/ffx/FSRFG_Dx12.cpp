@@ -4,6 +4,7 @@
 
 #include <hudfix/Hudfix_Dx12.h>
 #include <menu/menu_overlay_dx.h>
+#include <fg_time/FGTime_Dx12.h>
 
 #include <magic_enum.hpp>
 
@@ -504,9 +505,14 @@ bool FSRFG_Dx12::Dispatch()
         dfgPrepare.frameTimeDelta = static_cast<float>(state.lastFGFrameTime); // _ftDelta[fIndex];
         dfgPrepare.viewSpaceToMetersFactor = _meterFactor[fIndex];
 
+        FGTimeDx12::Init(_device);
+        FGTimeDx12::FGStart(_fgCommandList[fIndex]);
+
         retCode = FfxApiProxy::D3D12_Dispatch(&_fgContext, &dfgPrepare.header);
         LOG_DEBUG("D3D12_Dispatch result: {0}, frame: {1}, fIndex: {2}, commandList: {3:X}", retCode, willDispatchFrame,
                   fIndex, (size_t) dfgPrepare.commandList);
+
+        FGTimeDx12::FGEnd(_fgCommandList[fIndex]);
 
         if (retCode == FFX_API_RETURN_OK)
         {

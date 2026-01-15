@@ -22,6 +22,7 @@
 
 #include <array>
 #include <chrono>
+#include <algorithm>
 
 #define MARK_ALL_BACKENDS_CHANGED()                                                                                    \
     for (auto& singleChangeBackend : State::Instance().changeBackend)                                                  \
@@ -161,6 +162,7 @@ template <typename T, size_t N> struct RingBuffer
 const int plotWidth = 360;
 static RingBuffer<float, plotWidth> gFrameTimes;
 static RingBuffer<float, plotWidth> gUpscalerTimes;
+static RingBuffer<float, plotWidth> gFGTimes;
 
 struct FsExistsCache
 {
@@ -1754,6 +1756,7 @@ bool MenuCommon::RenderMenu()
     // Update frame time & upscaler time averages
     float averageFrameTime = 0.0f;
     float averageUpscalerFT = 0.0f;
+    float averageFGTime = 0.0f;
 
     if (config->ShowFps.value_or_default() || _isVisible)
     {
@@ -1774,11 +1777,14 @@ bool MenuCommon::RenderMenu()
 
         float lastFT = static_cast<float>(state.frameTimes.empty() ? 0.0f : state.frameTimes.back());
         float lastUT = static_cast<float>(state.upscaleTimes.empty() ? 0.0f : state.upscaleTimes.back());
+        float lastFGT = static_cast<float>(state.fgTimes.empty() ? 0.0f : state.fgTimes.back());
         gFrameTimes.Push(lastFT);
         gUpscalerTimes.Push(lastUT);
+        gFGTimes.Push(lastFGT);
 
         averageFrameTime = gFrameTimes.Average();
         averageUpscalerFT = gUpscalerTimes.Average();
+        averageFGTime = gFGTimes.Average();
     }
 
     // If Fps overlay is visible
@@ -1859,6 +1865,7 @@ bool MenuCommon::RenderMenu()
             std::string firstLine = "";
             std::string secondLine = "";
             std::string thirdLine = "";
+            std::string fourthLine = "";
 
             auto fg = state.currentFG;
             auto fgText = (fg != nullptr && fg->IsActive() && !fg->IsPaused()) ? ("(" + std::string(fg->Name()) + ")")
@@ -1922,6 +1929,14 @@ bool MenuCommon::RenderMenu()
             {
                 thirdLine =
                     StrFmt("Upscaler Time: %7.2f ms, Avg: %7.2f ms", state.upscaleTimes.back(), averageUpscalerFT);
+
+                // Show FG time if FG is active (not available for XeFG)
+                auto fg = state.currentFG;
+                if (fg != nullptr && fg->IsActive() && !fg->IsPaused() && state.activeFgOutput != FGOutput::XeFG)
+                {
+                    fourthLine =
+                        StrFmt("FG Time: %7.2f ms, Avg: %7.2f ms", state.fgTimes.back(), averageFGTime);
+                }
             }
 
             ImVec2 plotSize;
@@ -1935,12 +1950,10 @@ bool MenuCommon::RenderMenu()
                 auto firstSize = ImGui::CalcTextSize(firstLine.c_str());
                 auto secondSize = ImGui::CalcTextSize(secondLine.c_str());
                 auto thirdSize = ImGui::CalcTextSize(thirdLine.c_str());
+                auto fourthSize = ImGui::CalcTextSize(fourthLine.c_str());
                 auto textWidth = 0.0f;
 
-                if (firstSize.x > secondSize.x)
-                    textWidth = firstSize.x > thirdSize.x ? firstSize.x : thirdSize.x;
-                else
-                    textWidth = secondSize.x > thirdSize.x ? secondSize.x : thirdSize.x;
+                textWidth = std::max({ firstSize.x, secondSize.x, thirdSize.x, fourthSize.x });
 
                 auto minWidth = fpsScale * 300.0f;
                 auto plotWidth = textWidth < minWidth ? minWidth : textWidth;
@@ -2005,6 +2018,33 @@ bool MenuCommon::RenderMenu()
                     "##UpscalerFrameTimeGraph",
                     [](void* rb, int idx) -> float { return static_cast<RingBuffer<float, plotWidth>*>(rb)->At(idx); },
                     &gUpscalerTimes, plotWidth, 0, nullptr, 0.0f, 20.0f, plotSize);
+            }
+
+            if (config->FpsOverlayType.value_or_default() >= FpsOverlay_Full && !fourthLine.empty())
+            {
+                if (config->FpsOverlayHorizontal.value_or_default())
+                {
+                    ImGui::SameLine(0.0f, 0.0f);
+                    ImGui::Text(" | ");
+                    ImGui::SameLine(0.0f, 0.0f);
+                }
+                else
+                {
+                    ImGui::Spacing();
+                }
+
+                ImGui::Text(fourthLine.c_str());
+
+                if (config->FpsOverlayType.value_or_default() >= FpsOverlay_FullGraph)
+                {
+                    if (config->FpsOverlayHorizontal.value_or_default())
+                        ImGui::SameLine(0.0f, 0.0f);
+
+                    ImGui::PlotLines(
+                        "##FGTimeGraph",
+                        [](void* rb, int idx) -> float { return static_cast<RingBuffer<float, plotWidth>*>(rb)->At(idx); },
+                        &gFGTimes, plotWidth, 0, nullptr, 0.0f, 20.0f, plotSize);
+                }
             }
 
             if (config->FpsOverlayType.value_or_default() >= FpsOverlay_ReflexTimings)
@@ -5403,6 +5443,18 @@ bool MenuCommon::RenderMenu()
                         ImGui::PlotLines(
                             ups.c_str(), [](void* rb, int idx) -> float
                             { return static_cast<RingBuffer<float, plotWidth>*>(rb)->At(idx); }, &gUpscalerTimes,
+                            plotWidth);
+                    }
+
+                    auto fg = state.currentFG;
+                    if (fg != nullptr && fg->IsActive() && !fg->IsPaused() && state.activeFgOutput != FGOutput::XeFG)
+                    {
+                        ImGui::TableNextColumn();
+                        ImGui::Text("Frame Gen");
+                        auto fgt = StrFmt("%7.2f ms", state.fgTimes.back());
+                        ImGui::PlotLines(
+                            fgt.c_str(), [](void* rb, int idx) -> float
+                            { return static_cast<RingBuffer<float, plotWidth>*>(rb)->At(idx); }, &gFGTimes,
                             plotWidth);
                     }
 
